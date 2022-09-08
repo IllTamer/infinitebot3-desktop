@@ -45,6 +45,9 @@ async function createWindow() {
     },
   })
 
+  // close the menu bar
+  win.setMenuBarVisibility(false);
+
   if (app.isPackaged) {
     win.loadFile(indexHtml)
   } else {
