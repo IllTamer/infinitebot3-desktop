@@ -6,15 +6,10 @@
         default-active="2"
         class="aside-el-menu-vertical"
         :collapse="isCollapse"
-        @open="handleOpen"
-        @close="handleClose"
       >
         <el-menu-item index="1" @click="isCollapse = !isCollapse">
-          <!-- 不起作用 -->
-          <Transition name="slide-up">
-            <el-icon v-if="isCollapse"><ArrowRight/></el-icon>
-            <el-icon v-else><ArrowDown/></el-icon>
-          </Transition>
+          <el-icon v-if="isCollapse"><ArrowRight/></el-icon>
+          <el-icon v-else><ArrowDown/></el-icon>
         </el-menu-item>
         <el-menu-item index="2">
           <el-icon><icon-menu /></el-icon>
@@ -31,12 +26,16 @@
       </el-menu>
     </div>
     <!-- 状态栏 -->
-    <div class="status"></div>
+    <div class="background"></div>
+    <Transition name="status">
+      <div v-if="!isCollapse" class="status"></div>
+      <div v-else="isCollapse" class="status" style="width: 64px"></div>
+    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
+  import { ref, watch } from 'vue'
   import {
     ArrowDown,
     ArrowRight,
@@ -44,52 +43,56 @@
     Document,
     Setting,
   } from '@element-plus/icons-vue'
-  
-  const isCollapse = ref(false)
-  const handleOpen = (key: string, keyPath: string[]) => {
-    console.log(key, keyPath)
-  }
-  const handleClose = (key: string, keyPath: string[]) => {
-    console.log(key, keyPath)
-  }
 
-  function changeCollapse() {
+  const isCollapse = ref(false);
 
+  watch(isCollapse, () => {
+    recall(isCollapse.value);
+  });
+
+  const emits = defineEmits(['change']);
+  const recall = (change: boolean): void => {
+    emits('change', change);
   }
 </script>
 
 <style scoped lang="less">
   .aside {
-    background-color: #e9ebee;
+    // background-color: #e9ebee;
     width: 100%;
     height: 100%;
   }
-  .aside-el-menu-vertical:not(.el-menu--collapse) {
-    width: 200px;
+
+  .aside-el-menu-vertical {
+    min-height: 100%;
+  }
+
+  .menu {
     height: 100%;
   }
-  .menu {
-    // 动态计算
-    height: calc(100% - 22px);
+  .background {
+    width: 200px;
+    height: 22px;
+    position: fixed;
+    bottom: 0;
+    z-index: 999;
+    background-color: #e9ebee;
   }
   .status {
-    height: 22px;
-    width: auto;
+    .background;
     background-color: #54d1b0;
+
+    // el-menu 动画
+    // cubic-bezier(0.645, 0.045, 0.355, 1)
+    // cubic-bezier(0.23, 1, 0.32, 1)
+    &-enter-active,
+    &-leave-active {
+      transition: all 0.3s cubic-bezier(0.52, 0.09, 0.30, 1);
+    }
+
+    &-enter-from,
+    &-leave-to {
+      width: 64px;
+    }
   }
-
-  .slide-up-enter-active,
-.slide-up-leave-active {
-  transition: all 0.25s ease-out;
-}
-
-.slide-up-enter-from {
-  opacity: 0;
-  transform: translateY(30px);
-}
-
-.slide-up-leave-to {
-  opacity: 0;
-  transform: translateY(-30px);
-}
 </style>
